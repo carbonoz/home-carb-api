@@ -1,0 +1,8 @@
+services:
+  carbonoz_api:
+    container_name: carbonoz_api
+    image: akashi77/carbonoz
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/usr/src/app
