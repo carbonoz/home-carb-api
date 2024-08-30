@@ -47,6 +47,11 @@ const startServer = async () => {
   try {
     mqttClients = await connectUsersToMQTT()
     setupMQTTClient(mqttClients, wsServer);
+    setInterval(async () => {
+      console.log('Checking for new users and updating MQTT connections...');
+      mqttClients = await connectUsersToMQTT();
+      setupMQTTClient(mqttClients, wsServer);
+    }, 60000);
   } catch (error) {
     console.error('Error starting server:', error)
   }
