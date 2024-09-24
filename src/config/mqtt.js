@@ -11,7 +11,7 @@ function connectToMQTT(userPort) {
   })
 
   client.on('connect', () => {
-    console.log(`User ${userId} connected to MQTT broker on port ${mqttPort}`)
+    // console.log(`User ${userId} connected to MQTT broker on port ${mqttPort}`)
     client.subscribe('solar_assistant_DEYE/#')
   })
 
