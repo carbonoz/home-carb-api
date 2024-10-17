@@ -1,24 +1,20 @@
 import cors from 'cors'
 import express from 'express'
 import morgan from 'morgan'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { connectDatabase, disconnectDatabase } from './config/db'
-import connectUsersToMQTT from './config/mqtt'
-import { saveToRedis } from './utils/redis'
 import { redisClient } from './config/redis.db'
+import { saveToRedis } from './utils/redis'
 
 const app = express()
-let mqttClients = []
 
 app.use(cors())
 app.use(morgan('dev'))
 
-// Health check endpoint
 app.get('/', async (req, res) => {
-  res.status(200).json({ data: "Running ok" })
+  res.status(200).json({ data: 'Running ok' })
 })
 
-// Redis connection setup with error handling
 redisClient
   .connect()
   .then(() => {
@@ -31,22 +27,50 @@ redisClient.on('error', (err) => {
   console.error('Redis Client Connection Error:', err)
 })
 
-// Function to set up MQTT clients with error handling
-function setupMQTTClient(clients, wsServer) {
-  clients.forEach(({ client, userId }) => {
-    client.on('message', (topic, message) => {
-      const Message = message.toString()
-      saveToRedis({ topic, message: Message, userId, wsServer })
-        .then(() => {
-        })
-        .catch((error) => {
-          console.error(`Error saving message for user ${userId}:`, error)
-        })
+const reconnectDelay = 5000
+
+const connectWebSocketFRomAddon = (wsServer) => {
+  const serverUrl = 'ws://192.168.160.55:6789'
+  const WS = new WebSocket(serverUrl)
+
+  WS.on('open', () => {
+    console.log('Connected to WebSocket Server 1')
+
+    WS.on('message', (obj) => {
+      try {
+        const messageString = obj?.toString()
+        try {
+          const parsedMessage = JSON.parse(messageString)
+
+          const { topic, message, userId } = parsedMessage
+
+          saveToRedis({ topic, message, userId ,wsServer})
+            .then(() => {})
+            .catch((error) => {
+              console.error('Error saving data to Redis:', error)
+            })
+        } catch (err) {
+          console.error('Failed to process message:', err)
+        }
+      } catch (error) {
+        console.error('Error parsing message:', error)
+      }
     })
 
-    client.on('error', (error) => {
-      console.error(`MQTT client error for user ${userId}:`, error)
+    WS.on('close', () => {
+      console.log('WebSocket connection closed, attempting to reconnect...')
+      setTimeout(() => connectWebSocketFRomAddon(wsServer), reconnectDelay)
     })
+
+    WS.on('error', (err) => {
+      console.error('WebSocket Error:', err.message)
+      console.error('Error Details:', err)
+    })
+  })
+
+  WS.on('error', (err) => {
+    console.error('WebSocket connection failed:', err.message)
+    setTimeout(() => connectWebSocketFRomAddon(wsServer), reconnectDelay)
   })
 }
 
@@ -59,11 +83,14 @@ const startServer = async () => {
       console.log(`Server is running on port ${PORT}`)
     })
 
-    // WebSocket server with connection handling
-    const wsServer = new WebSocket.Server({ server })
+    const wsServer = new WebSocketServer({ server })
+
+    connectWebSocketFRomAddon(wsServer)
 
     wsServer.on('connection', (ws) => {
       console.log('WebSocket client connected')
+
+      ws.on('message', (obj) => {})
 
       ws.on('close', () => {
         console.log('WebSocket client disconnected')
@@ -73,18 +100,6 @@ const startServer = async () => {
         console.error('WebSocket error:', err)
       })
     })
-
-    // Initial MQTT client setup
-    mqttClients = await connectUsersToMQTT()
-    setupMQTTClient(mqttClients, wsServer)
-
-    // Periodic check for new users to update MQTT connections every minute
-    setInterval(async () => {
-      console.log('Checking for new users and updating MQTT connections...')
-      mqttClients = await connectUsersToMQTT()
-      setupMQTTClient(mqttClients, wsServer)
-    }, 60000)
-
   } catch (error) {
     console.error('Error starting server:', error)
   }
@@ -92,10 +107,8 @@ const startServer = async () => {
 
 startServer().catch(console.error)
 
-// Graceful shutdown on SIGINT
 process.on('SIGINT', async () => {
   try {
-    console.log('Received SIGINT. Gracefully shutting down...')
     await disconnectDatabase()
     process.exit(0)
   } catch (error) {
@@ -104,14 +117,11 @@ process.on('SIGINT', async () => {
   }
 })
 
-// Global error handling to keep the app running
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err.message)
   console.error(err.stack)
-  // Keep the app alive despite the exception
 })
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason)
-  // Keep the app alive
 })
