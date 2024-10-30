@@ -12,7 +12,7 @@ app.use(cors())
 app.use(morgan('dev'))
 
 app.get('/', async (req, res) => {
-  res.status(200).json({ data: 'Running ok' })
+  res.status(200).json({ data: 'Server Running ok' })
 })
 
 redisClient
