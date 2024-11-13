@@ -2,7 +2,6 @@ import cors from 'cors'
 import express from 'express'
 import morgan from 'morgan'
 import WebSocket, { WebSocketServer } from 'ws'
-import { connectDatabase, disconnectDatabase } from './config/db'
 import { redisClient } from './config/redis.db'
 import { saveToRedis } from './utils/redis'
 
@@ -12,7 +11,7 @@ app.use(cors())
 app.use(morgan('dev'))
 
 app.get('/', async (req, res) => {
-  res.status(200).json({ data: 'Running ok' })
+  res.status(200).json({ data: 'Server Running ok' })
 })
 
 redisClient
@@ -76,7 +75,6 @@ const connectWebSocketFRomAddon = (wsServer) => {
 
 const startServer = async () => {
   try {
-    await connectDatabase()
 
     const PORT = process.env.PORT || 8000
     const server = app.listen(PORT, () => {
@@ -107,15 +105,7 @@ const startServer = async () => {
 
 startServer().catch(console.error)
 
-process.on('SIGINT', async () => {
-  try {
-    await disconnectDatabase()
-    process.exit(0)
-  } catch (error) {
-    console.error('Error during shutdown:', error)
-    process.exit(1)
-  }
-})
+
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err.message)
