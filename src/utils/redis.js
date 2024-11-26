@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
-import WebSocket from 'ws'
-import { redisClient } from '../config/redis.db'
 import { promisify } from 'util'
+import { redisClient } from '../config/redis.db'
 
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -12,7 +11,7 @@ dayjs.extend(timezone)
 const hsetAsync = promisify(redisClient.hSet).bind(redisClient)
 const hgetAsync = promisify(redisClient.hGet).bind(redisClient)
 
-export const saveToRedis = async ({ topic, message, userId, wsServer }) => {
+export const saveToRedis = async ({ topic, message, userId }) => {
   try {
     const now = dayjs().tz('Indian/Mauritius')
     const date = now.format('YYYY-MM-DD')
@@ -102,11 +101,11 @@ export const saveToRedis = async ({ topic, message, userId, wsServer }) => {
     if (updated || !existingData) {
       const concatenatedValues = `${pv},${userId},${load},${gridIn},${gridOut},${batteryCharged},${batteryDischarged}`
       await hsetAsync('redis-data', date, concatenatedValues)
-      wsServer.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify('Ok'))
-        }
-      })
+      // wsServer.clients.forEach((client) => {
+      //   if (client.readyState === WebSocket.OPEN) {
+      //     client.send(JSON.stringify('Ok'))
+      //   }
+      // })
     }
   } catch (error) {
     console.error('Error saving data to Redis:', error)
