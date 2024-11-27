@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 redisClient
   .connect()
   .then(() => console.log('Redis connected'))
-  .catch((err) => console.error('Redis connection error:', err))
+  .catch((err) => console.error('Redis connection on error:', err))
 
 redisClient.on('error', (err) => {
   console.error('Redis Client Connection Error:', err)
