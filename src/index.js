@@ -13,7 +13,6 @@ app.get('/', (req, res) => {
   res.status(200).json({ data: 'Server Running ok' })
 })
 
-
 redisClient
   .connect()
   .then(() => console.log('Redis connected'))
@@ -22,8 +21,6 @@ redisClient
 redisClient.on('error', (err) => {
   console.error('Redis Client Connection Error:', err)
 })
-
-
 
 const startServer = async () => {
   try {
@@ -36,6 +33,13 @@ const startServer = async () => {
 
     wsServer.on('connection', (ws) => {
       console.log('WebSocket client connected')
+      const heartbeatInterval = setInterval(() => {
+        if (ws.readyState === ws.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }))
+        } else {
+          clearInterval(heartbeatInterval)
+        }
+      }, 30000)
       ws.on('message', (obj) => {
         try {
           const messageString = obj?.toString()
@@ -56,7 +60,10 @@ const startServer = async () => {
           console.error('Error parsing message:', error)
         }
       })
-      ws.on('close', () => console.log('WebSocket client disconnected'))
+      ws.on('close', () => {
+        console.log('WebSocket client disconnected')
+        clearInterval(heartbeatInterval)
+      })
       ws.on('error', (err) => console.error('WebSocket error:', err))
     })
   } catch (error) {
