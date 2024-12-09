@@ -52,42 +52,42 @@ export const saveToRedis = async ({ topic, message, userId }) => {
 
     let updated = false
     switch (topic) {
-      case 'solar_assistant_DEYE/total/load_energy/state':
+      case `${topic}/total/load_energy/state`:
         const newLoad = parseFloat(message)
         if (newLoad !== load) {
           load = newLoad
           updated = true
         }
         break
-      case 'solar_assistant_DEYE/total/pv_energy/state':
+      case `${topic}/total/pv_energy/state`:
         const newPv = parseFloat(message)
         if (newPv !== pv) {
           pv = newPv
           updated = true
         }
         break
-      case 'solar_assistant_DEYE/total/battery_energy_in/state':
+      case `${topic}/total/battery_energy_in/state`:
         const newBatteryCharged = parseFloat(message)
         if (newBatteryCharged !== batteryCharged) {
           batteryCharged = newBatteryCharged
           updated = true
         }
         break
-      case 'solar_assistant_DEYE/total/battery_energy_out/state':
+      case `${topic}/total/battery_energy_out/state`:
         const newBatteryDischarged = parseFloat(message)
         if (newBatteryDischarged !== batteryDischarged) {
           batteryDischarged = newBatteryDischarged
           updated = true
         }
         break
-      case 'solar_assistant_DEYE/total/grid_energy_in/state':
+      case `${topic}/total/grid_energy_in/state`:
         const newGridIn = parseFloat(message)
         if (newGridIn !== gridIn) {
           gridIn = newGridIn
           updated = true
         }
         break
-      case 'solar_assistant_DEYE/total/grid_energy_out/state':
+      case `${topic}/total/grid_energy_out/state`:
         const newGridOut = parseFloat(message)
         if (newGridOut !== gridOut) {
           gridOut = newGridOut
