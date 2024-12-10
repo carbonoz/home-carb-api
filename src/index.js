@@ -46,9 +46,11 @@ const startServer = async () => {
           try {
             const parsedMessage = JSON.parse(messageString)
 
-            const { topic, message, userId,mqttTopicPrefix } = parsedMessage
+            const { topic, message, userId, mqttTopicPrefix } = parsedMessage
 
-            saveToRedis({ topic, message, userId ,mqttTopicPrefix})
+            console.log({topic, message, userId, mqttTopicPrefix})
+
+            saveToRedis({ topic, message, userId, mqttTopicPrefix })
               .then(() => {})
               .catch((error) => {
                 console.error('Error saving data to Redis:', error)
