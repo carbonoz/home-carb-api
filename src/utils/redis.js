@@ -11,7 +11,7 @@ dayjs.extend(timezone)
 const hsetAsync = promisify(redisClient.hSet).bind(redisClient)
 const hgetAsync = promisify(redisClient.hGet).bind(redisClient)
 
-export const saveToRedis = async ({ topic, message, userId }) => {
+export const saveToRedis = async ({ topic, message, userId,mqttTopicPrefix }) => {
   try {
     const now = dayjs().tz('Indian/Mauritius')
     const date = now.format('YYYY-MM-DD')
@@ -52,42 +52,42 @@ export const saveToRedis = async ({ topic, message, userId }) => {
 
     let updated = false
     switch (topic) {
-      case `${topic}/total/load_energy/state`:
+      case `${mqttTopicPrefix}/total/load_energy/state`:
         const newLoad = parseFloat(message)
         if (newLoad !== load) {
           load = newLoad
           updated = true
         }
         break
-      case `${topic}/total/pv_energy/state`:
+      case `${mqttTopicPrefix}/total/pv_energy/state`:
         const newPv = parseFloat(message)
         if (newPv !== pv) {
           pv = newPv
           updated = true
         }
         break
-      case `${topic}/total/battery_energy_in/state`:
+      case `${mqttTopicPrefix}/total/battery_energy_in/state`:
         const newBatteryCharged = parseFloat(message)
         if (newBatteryCharged !== batteryCharged) {
           batteryCharged = newBatteryCharged
           updated = true
         }
         break
-      case `${topic}/total/battery_energy_out/state`:
+      case `${mqttTopicPrefix}/total/battery_energy_out/state`:
         const newBatteryDischarged = parseFloat(message)
         if (newBatteryDischarged !== batteryDischarged) {
           batteryDischarged = newBatteryDischarged
           updated = true
         }
         break
-      case `${topic}/total/grid_energy_in/state`:
+      case `${mqttTopicPrefix}/total/grid_energy_in/state`:
         const newGridIn = parseFloat(message)
         if (newGridIn !== gridIn) {
           gridIn = newGridIn
           updated = true
         }
         break
-      case `${topic}/total/grid_energy_out/state`:
+      case `${mqttTopicPrefix}/total/grid_energy_out/state`:
         const newGridOut = parseFloat(message)
         if (newGridOut !== gridOut) {
           gridOut = newGridOut
