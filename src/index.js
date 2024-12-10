@@ -48,7 +48,6 @@ const startServer = async () => {
 
             const { topic, message, userId, mqttTopicPrefix } = parsedMessage
 
-            console.log({topic, message, userId, mqttTopicPrefix})
 
             saveToRedis({ topic, message, userId, mqttTopicPrefix })
               .then(() => {})
