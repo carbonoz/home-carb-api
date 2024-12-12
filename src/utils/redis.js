@@ -18,7 +18,7 @@ export const saveToRedis = async ({ topic, message, userId,mqttTopicPrefix }) =>
     const now = dayjs()
     const date = now.format('YYYY-MM-DD')
 
-    let existingData = await hgetAsync('redis-data', date)
+    let existingData = await hgetAsync('redis-data', `${date}-${userId}`)
 
     let load = 0
     let pv = 0
@@ -96,7 +96,7 @@ export const saveToRedis = async ({ topic, message, userId,mqttTopicPrefix }) =>
 
     if (updated || !existingData) {
       const concatenatedValues = `${pv},${userId},${load},${gridIn},${gridOut},${batteryCharged},${batteryDischarged}`
-      await hsetAsync('redis-data', date, concatenatedValues)
+      await hsetAsync('redis-data', `${date}-${userId}`, concatenatedValues)
     }
   } catch (error) {
     console.error('Error saving data to Redis:', error)
