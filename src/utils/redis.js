@@ -36,6 +36,7 @@ export const saveToRedis = async ({ topic, message, userId,mqttTopicPrefix }) =>
         existingGridOut,
         existingBatteryCharged,
         existingBatteryDischarged,
+        existingMqttTopicPrefix,
       ] = existingData.split(',').map(parseFloat)
 
       load = existingLoad
@@ -95,7 +96,7 @@ export const saveToRedis = async ({ topic, message, userId,mqttTopicPrefix }) =>
     }
 
     if (updated || !existingData) {
-      const concatenatedValues = `${pv},${userId},${load},${gridIn},${gridOut},${batteryCharged},${batteryDischarged}`
+      const concatenatedValues = `${pv},${userId},${load},${gridIn},${gridOut},${batteryCharged},${batteryDischarged},${mqttTopicPrefix}`
       await hsetAsync('redis-data', `${date}-${userId}`, concatenatedValues)
     }
   } catch (error) {
