@@ -4,6 +4,7 @@ import morgan from 'morgan'
 import { WebSocketServer } from 'ws'
 import { redisClient } from './config/redis.db'
 import { saveToRedis } from './utils/redis'
+import https from 'https'
 
 const app = express()
 app.use(cors())
@@ -25,8 +26,12 @@ redisClient.on('error', (err) => {
 const startServer = async () => {
   try {
     const PORT = process.env.PORT || 8000
-    const server = app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`)
+    const sslOptions = {
+      key: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/privkey.pem'),
+      cert: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/fullchain.pem')
+    }
+     const server = https.createServer(sslOptions, app).listen(PORT, () => {
+      console.log(`Secure server is running on port ${PORT}`)
     })
 
     const wsServer = new WebSocketServer({ server })
