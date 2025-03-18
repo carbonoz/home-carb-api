@@ -25,7 +25,7 @@ redisClient.on('error', (err) => {
 
 const startServer = async () => {
   try {
-    const PORT = process.env.PORT || 8000
+    const PORT = process.env.PORT || 7000
     const sslOptions = {
       key: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/fullchain.pem')
