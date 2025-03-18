@@ -26,11 +26,11 @@ redisClient.on('error', (err) => {
 const startServer = async () => {
   try {
     const PORT = process.env.PORT || 7000
-    const sslOptions = {
-      key: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/privkey.pem'),
-      cert: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/fullchain.pem')
-    }
-     const server = https.createServer(sslOptions, app).listen(PORT, () => {
+    // const sslOptions = {
+    //   key: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/privkey.pem'),
+    //   cert: fs.readFileSync('/etc/letsencrypt/live/broker.carbonoz.com/fullchain.pem')
+    // }
+     const server = app.listen(PORT, () => {
       console.log(`Secure server is running on port ${PORT}`)
     })
 
